@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind utilities;
+@tailwind components;
+
+
+@layer {
+  html {
+    @apply text-dark bg-light scroll-smooth;
+  }
+}
+
+@layer utilities {
+  .main-container {
+    @apply max-w-[1400px] w-full 
+  }
+
+  .padding {
+    @apply px-2 md:px-3 lg:px-4
+  }
+
+  .trans {
+    @apply transition-all duration-300 ease-out
+  }
+}
+
+@layer components {
+  .btn-flat {
+    @apply flex items-center p-2 capitalize rounded-xl hover:bg-shading hover:shadow-lg active:scale-105 focus:ring focus:ring-shading trans cursor-pointer font-semibold
+  }
+  .btn {
+    @apply p-2 text-light rounded-xl bg-primary hover:bg-secondary shadow-lg trans cursor-pointer capitalize font-semibold focus:ring focus:ring-shading
+  }
+  .input {
+    @apply focus:outline-none flex items-center p-2 rounded-xl border focus:ring border-shading focus:ring-secondary  
+  }
+}

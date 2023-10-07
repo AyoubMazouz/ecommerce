@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Stat {
+  CHART
+  CHECKED_OUT
+  CONFIRMED
+  DELIVERED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  role      Role     @default(USER)
+  firstName String?
+  lastName  String?
+  email     String
+  password  String
+  phone     Int?
+  address   String?
+  products  Review[]
+  orders    Order[]
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+model Product {
+  id             Int              @id @default(autoincrement())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt()
+  title          String
+  description    String
+  brand          String
+  quantity       Int
+  price          Int
+  discount       Int              @default(0)
+  category       Category?        @relation(fields: [categoryId], references: [id])
+  categoryId     Int?
+  published      Boolean          @default(false)
+  reviews        Review[]
+  OrderedProduct OrderedProduct[]
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  rating    Int
+  comment   String?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model OrderedProduct {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  Order     Order    @relation(fields: [orderId], references: [id])
+  orderId   Int
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int
+}
+
+model Order {
+  id        Int              @id @default(autoincrement())
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt()
+  user      User             @relation(fields: [userId], references: [id])
+  userId    Int
+  products  OrderedProduct[]
+  stat      Stat             @default(CHART)
+}
