@@ -12,7 +12,10 @@ export async function handle({ event, resolve }) {
 	if (jwtToken) {
 		const decodedToken = jwt.verify(jwtToken, JWT_SECRET) as { id: number; iat: number };
 		user = await prisma.user.findFirst({ where: { id: decodedToken.id } });
-		if (user) event.locals.currUser = user;
+		if (user) {
+			user.password = '';
+			event.locals.currUser = user;
+		}
 	}
 
 	// Prevent all users except the admin from accessing the admin... route.

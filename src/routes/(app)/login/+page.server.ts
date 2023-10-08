@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '$env/static/private';
 import bcrypt from 'bcrypt';
 import { redirect } from '@sveltejs/kit';
-import alertStore from '../../../stores/alter.js';
+import { getAlertAsParams } from '$lib/helper/url.js';
 
 /** @type {import('./$types').Actions} */
 export const actions = {
@@ -21,8 +21,8 @@ export const actions = {
 			// Set Jwt.
 			const jwtToken = jwt.sign({ id: user.id }, JWT_SECRET);
 			cookies.set('jwt', jwtToken);
-			alertStore.set('danger', `Welcome back ${user.firstName} ${user.lastName}!`);
-			throw redirect(303, '/');
+			const alert = getAlertAsParams('info', `Welcome back ${user.firstName} ${user.lastName}!`);
+			throw redirect(303, '/' + alert);
 		}
 
 		return { ok: false, msg: 'email or password are invalid' };

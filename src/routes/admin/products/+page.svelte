@@ -3,7 +3,6 @@
 	import Icon from '@iconify/svelte';
 
 	export let data;
-	$: products = data.products;
 </script>
 
 <div class="padding">
@@ -16,22 +15,39 @@
 	<!-- Filter -->
 	<div class="flex items-center justify-between flex-wrap gap-x-4 gap-y-2">some filters</div>
 	<!-- Products -->
-	<div class="flex flex-wrap items-center justify-center">
-		{#each products as prod, i (prod.title)}
-			<div
-				class="relative w-full p-2 rounded-xl border border-shading {i % 2 === 0 &&
-					'bg-semi-light'}"
-			>
+	<div class="flex flex-wrap items-center justify-center gap-4 text-sm">
+		{#each data.products as prod, i (prod.title)}
+			<div class="relative w-full p-2 pb-1 rounded-xl border border-shading bg-semi-light">
 				<div class="flex justify-between">
-					<div class="font-semibold w-full">{prod.id} | {prod.title}</div>
-					<div class="">{prod.price}</div>
+					<h1 class="w-full">
+						<span class="font-semibold text-semi-dark"
+							><span>{prod.brand}</span> <span class="text-dark">{prod.title}</span>
+						</span>
+					</h1>
+					<p>{prod?.category?.name ?? 'unset'}</p>
 				</div>
-				<div>
-					{prod.brand}
-				</div>
-				<div class="absolute bottom-2 right-2">
-					<div class="text-xs">Update At : {getRelativeTime(prod.updatedAt)}</div>
-					<div class="text-xs">Created At: {getRelativeTime(prod.createdAt)}</div>
+
+				<div class="flex justify-between text-xs text-semi-dark">
+					<div class="flex items-center gap-x-4">
+						<Icon
+							icon="solar:global-line-duotone"
+							width="22px"
+							class={prod.published ? 'text-green-500' : 'text-red-500'}
+						/>
+						<div class="flex items-center gap-x-1">
+							<Icon icon="solar:battery-half-line-duotone" width="22px" />
+							{prod.quantity}
+						</div>
+						<div class="flex items-center gap-x-1">
+							<Icon icon="solar:tag-price-line-duotone" width="22px" />
+							{prod.discount}%
+						</div>
+						<div class="flex items-center gap-x-1">
+							<Icon icon="solar:wallet-money-line-duotone" width="22px" />
+							{prod.price}
+						</div>
+					</div>
+					<div>{getRelativeTime(prod.updatedAt)}</div>
 				</div>
 			</div>
 		{/each}

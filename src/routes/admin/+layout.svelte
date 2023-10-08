@@ -1,15 +1,24 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Logo from '$lib/Logo.svelte';
+	import Alert from '$lib/components/Alert.svelte';
 	import Icon from '@iconify/svelte';
+	import alertStore from '../../stores/alterStore.js';
 
-	// export let data;
+	export let data;
 	let currPath: string, pathList: string[];
 	$: {
 		currPath = $page.url.pathname.replace('/admin/', '');
 		pathList = currPath.split('/');
 	}
+	$: {
+		const type = $page.url.searchParams.get('alertType');
+		const body = $page.url.searchParams.get('alertBody');
+		if (type && body) alertStore.set(type, body);
+	}
 </script>
+
+<Alert />
 
 <div class="flex w-full">
 	<!-- Nav -->
@@ -91,9 +100,7 @@
 				{/if}
 				Settings
 			</a>
-			<div
-				class="flex gap-x-4 items-center font-semibold text-semi-dark px-4 py-2 rounded-2xl border border-shading bg-light"
-			>
+			<div class="flex gap-x-4 items-center px-4 py-2 rounded-2xl border border-shading bg-light">
 				<div class="overflow-hidden aspect-square h-[3.1rem] rounded-full border border-shading">
 					<img
 						src="https://miro.medium.com/v2/resize:fill:32:32/1*dmbNkD5D-u45r44go_cf0g.png"
@@ -101,7 +108,10 @@
 						class="object-cover w-full h-full"
 					/>
 				</div>
-				<div>My Username</div>
+				<p class="capitalize font-semibold text-semi-dark">
+					{data.currUser.firstName}
+					{data.currUser.lastName}
+				</p>
 			</div>
 		</div>
 	</div>

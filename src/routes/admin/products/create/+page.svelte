@@ -2,24 +2,18 @@
 	import { enhance } from '$app/forms';
 	import Switch from '$lib/components/switch.svelte';
 
-	export let form;
-	const categories = [
-		'Cigarettes',
-		'Vaping Devices',
-		'E-Liquids',
-		'Accessories',
-		'Hookahs',
-		'Rolling Papers',
-		'Lighters',
-		'Ashtrays',
-		'Cigarillos',
-		'CBD Products'
-	];
+	export let data;
+	export let form: any;
 
 	function handleUppercase(e: any) {
 		if (e?.target) e.target.value = e.target.value.toUpperCase();
 	}
 </script>
+
+<form action="?/test" method="POST" use:enhance enctype="multipart/form-data">
+	<input type="file" name="imgs" multiple accept="" />
+	<button>test</button>
+</form>
 
 <div class="padding mt-12">
 	<form method="POST" action="?/create" use:enhance class="grid grid-cols-2 gap-y-4 gap-x-6">
@@ -65,8 +59,8 @@
 				value={form?.data?.category ?? ''}
 				class="input w-full bg-light"
 			>
-				{#each categories as cat, i (cat)}
-					<option value={i}>{cat}</option>
+				{#each data.categories as cat (cat)}
+					<option value={cat.id}>{cat.name}</option>
 				{/each}
 			</select>
 			<p class="text-danger text-xs mt-1">{form?.errors?.category ?? ''}</p>

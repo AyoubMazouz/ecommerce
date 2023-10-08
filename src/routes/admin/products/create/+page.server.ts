@@ -1,4 +1,10 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { writeFile } from 'fs/promises';
+import { getAlertAsParams } from '$lib/helper/url.js';
+import { redirect } from '@sveltejs/kit';
+
+export const load = async () => {
+	return { categories: await prisma.category.findMany() };
+};
 
 /** @type {import('./$types').Actions} */
 export const actions = {
@@ -24,15 +30,11 @@ export const actions = {
 			return { data, errors };
 		}
 
-		await prisma.product.create({
+		const dbRes = await prisma.product.create({
 			data: {
 				title: title.toString(),
 				brand: brand.toString(),
-				// category: {
-				// 	connect: {
-				// 		id: Number(category.toString())
-				// 	}
-				// },
+				category: { connect: { id: Number(category.toString()) } },
 				price: Number(price.toString()),
 				discount: Number(price.toString()),
 				quantity: Number(quantity.toString()),
@@ -41,6 +43,29 @@ export const actions = {
 			}
 		});
 
-		throw redirect(303, '/admin/products');
+		const alert = getAlertAsParams(
+			'success',
+			`Product "${dbRes.id} has been created successfully!"`
+		);
+
+		throw redirect(303, '/admin/products' + alert);
+	},
+	test: async ({ request }) => {
+		const formValues = await request.formData();
+		const imgs: any = formValues.getAll('imgs');
+		if (imgs) {
+			try {
+				imgs.forEach(async (img: File, i: number) => {
+					let ext: any = img.name.split('.');
+					ext = ext[ext.length - 1];
+					await writeFile(`static/data/0/${i}.${ext}`, Buffer.from(await img.arrayBuffer()));
+				});
+			} catch (err: any) {
+				console.error(err);
+				if (err.code === 'EEXIST') {
+					const alert = getAlertAsParams('danger', `Directory already exists!`);
+				}
+			}
+		}
 	}
 };

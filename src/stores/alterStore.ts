@@ -6,8 +6,6 @@ interface Alert {
 	body: string;
 }
 
-const ALERT_DISPLAY_TIME = 10000;
-
 const createStore = () => {
 	const { subscribe, update, set: _set } = writable<Alert[]>([]);
 
@@ -20,7 +18,7 @@ const createStore = () => {
 			update((alerts: Alert[]) => {
 				return alerts.filter((alter: Alert) => alter.id !== id);
 			});
-		}, ALERT_DISPLAY_TIME);
+		}, 10000);
 	};
 
 	const clear = () => _set([]);
