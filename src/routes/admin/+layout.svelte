@@ -20,10 +20,10 @@
 
 <Alert />
 
-<div class="flex w-full">
+<div class="flex w-full min-w-[960px]">
 	<!-- Nav -->
 	<div
-		class="flex flex-col justify-between w-[28rem] h-screen border-r border-shading bg-semi-light"
+		class="flex flex-col justify-between h-screen border-r border-shading bg-semi-light lg:w-[18rem] xl:w-[22rem]"
 	>
 		<div class="">
 			<div class="p-4 text-center">
@@ -33,7 +33,7 @@
 			<div class="flex flex-col gap-y-2 p-4">
 				<a
 					href="/admin/orders"
-					class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-xl trans flex items-center gap-x-4 {currPath.startsWith(
+					class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-xl trans flex justify-center lg:justify-start items-center gap-x-4 {currPath.startsWith(
 						'orders'
 					) && 'bg-secondary/25'}"
 				>
@@ -42,11 +42,11 @@
 					{:else}
 						<Icon icon="solar:reorder-line-duotone" width="24px" />
 					{/if}
-					Orders
+					<span class="hidden lg:block">Orders</span>
 				</a>
 				<a
 					href="/admin/products"
-					class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-xl trans flex items-center gap-x-4 {currPath.startsWith(
+					class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-xl trans flex justify-center lg:justify-start items-center gap-x-4 {currPath.startsWith(
 						'products'
 					) && 'bg-secondary/25'}"
 				>
@@ -55,11 +55,11 @@
 					{:else}
 						<Icon icon="solar:box-linear" width="24px" />
 					{/if}
-					Products
+					<span class="hidden lg:block">Products</span>
 				</a>
 				<a
 					href="/admin/messages"
-					class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-xl trans flex items-center gap-x-4 {currPath.startsWith(
+					class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-lg trans flex justify-center lg:justify-start items-center gap-x-4 {currPath.startsWith(
 						'messages'
 					) && 'bg-secondary/25'}"
 				>
@@ -68,7 +68,7 @@
 					{:else}
 						<Icon icon="solar:letter-linear" width="24px" />
 					{/if}
-					Messages
+					<span class="hidden lg:block">Messages</span>
 				</a>
 			</div>
 		</div>
@@ -76,7 +76,7 @@
 		<div class="p-4 flex flex-col gap-y-2">
 			<a
 				href="/admin/support"
-				class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-xl trans flex items-center gap-x-4 {currPath.startsWith(
+				class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-xl trans flex items-center justify-center lg:justify-start gap-x-4 {currPath.startsWith(
 					'support'
 				) && 'bg-secondary/25'}"
 			>
@@ -85,11 +85,11 @@
 				{:else}
 					<Icon icon="solar:chat-square-code-linear" width="24px" />
 				{/if}
-				Support
+				<span class="hidden lg:block">Support</span>
 			</a>
 			<a
 				href="/admin/settings"
-				class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-xl trans flex items-center gap-x-4 {currPath.startsWith(
+				class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-xl trans flex items-center justify-center lg:justify-start gap-x-4 {currPath.startsWith(
 					'settings'
 				) && 'bg-secondary/25'}"
 			>
@@ -98,9 +98,12 @@
 				{:else}
 					<Icon icon="solar:settings-linear" width="24px" />
 				{/if}
-				Settings
+				<span class="hidden lg:block">Settings</span>
 			</a>
-			<div class="flex gap-x-4 items-center px-4 py-2 rounded-2xl border border-shading bg-light">
+			<a
+				href=""
+				class="flex gap-x-4 items-center lg:px-4 p-2 rounded-xl border border-shading bg-light hover:opacity-75 trans"
+			>
 				<div class="overflow-hidden aspect-square h-[3.1rem] rounded-full border border-shading">
 					<img
 						src="https://miro.medium.com/v2/resize:fill:32:32/1*dmbNkD5D-u45r44go_cf0g.png"
@@ -108,14 +111,16 @@
 						class="object-cover w-full h-full"
 					/>
 				</div>
-				<p class="capitalize font-semibold text-semi-dark">
+				<p
+					class="hidden lg:block text-sm xl:text-base capitalize font-semibold text-semi-dark whitespace-nowrap"
+				>
 					{data.currUser.firstName}
 					{data.currUser.lastName}
 				</p>
-			</div>
+			</a>
 		</div>
 	</div>
-	<div class="w-full">
+	<div class="w-full h-screen overflow-y-scroll min-w-[]">
 		<div class="flex items-center gap-x-4 capitalize p-4">
 			<button class="btn-flat mr-4">
 				<a href="/admin/{pathList.slice(0, pathList.length - 1).join('/')}">
