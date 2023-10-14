@@ -1,5 +1,4 @@
 import { redirect } from '@sveltejs/kit';
-import alertStore from '../../../stores/alterStore.js';
 import { getAlertAsParams } from '$lib/helper/url.js';
 
 /** @type {import('./$types').RequestHandler} */

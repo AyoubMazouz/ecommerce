@@ -1,3 +1,8 @@
+export const PHONE = ['0770759106'];
+export const EMAIL = 'contact@saca.ma';
+export const ADDRESS = '184 Main Street East Perl Habour 8007';
+export const WORK_HOURS = 'Mon - Sun 8:00 - 12:00 Open Everyday Of The Week';
+
 export const categories = [
 	{
 		category: 'cigarettes',

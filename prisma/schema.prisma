@@ -20,74 +20,93 @@ enum Stat {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
-  role      Role     @default(USER)
-  firstName String?
-  lastName  String?
-  email     String
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  role      Role      @default(USER)
+  firstName String
+  lastName  String
+  email     String    @unique
   password  String
   phone     Int?
   address   String?
-  products  Review[]
+  favorites Product[]
+  reviews   Review[]
   orders    Order[]
+
+  @@index([id, email])
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
+  id       String    @id @default(uuid())
   name     String
   products Product[]
 }
 
 model Product {
-  id             Int              @id @default(autoincrement())
+  id             String           @id @default(uuid())
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt()
   title          String
   brand          String
   description    String
-  quantity       Int
-  fileNames      String
   price          Int
-  variantId      Int?
   tags           String?
+  quantity       Int?             @default(0)
   discount       Int?             @default(0)
-  categoryId     Int?
-  category       Category?        @relation(fields: [categoryId], references: [id])
   published      Boolean?         @default(false)
+  categoryId     String
+  category       Category         @relation(fields: [categoryId], references: [id])
+  images         Images[]
   reviews        Review[]
-  OrderedProduct OrderedProduct[]
+  orderedProduct OrderedProduct[]
+  user           User?            @relation(fields: [userId], references: [id])
+  userId         String?
+
+  @@index([id, title, brand, price, categoryId])
+}
+
+model Images {
+  id        String  @id @default(uuid())
+  name      String
+  type      String
+  path      String
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 model Review {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
   rating    Int
   comment   String?
+  userId    String
   user      User     @relation(fields: [userId], references: [id])
-  userId    Int
+  productId String
   product   Product  @relation(fields: [productId], references: [id])
-  productId Int
+
+  @@index([rating])
 }
 
 model OrderedProduct {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
-  Order     Order    @relation(fields: [orderId], references: [id])
-  orderId   Int
-  product   Product  @relation(fields: [productId], references: [id])
-  productId Int
   quantity  Int
+  orderId   String
+  Order     Order    @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
 }
 
 model Order {
-  id        Int              @id @default(autoincrement())
+  id        String           @id @default(uuid())
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt()
   user      User             @relation(fields: [userId], references: [id])
-  userId    Int
+  userId    String
   products  OrderedProduct[]
   stat      Stat             @default(CHART)
+
+  @@index([id, userId, stat])
 }

@@ -1,6 +1,7 @@
-import { writeFile, mkdir } from 'fs/promises';
+import fs from 'fs/promises';
+import sharp from 'sharp';
 import { getAlertAsParams } from '$lib/helper/url.js';
-import { redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 
 export const load = async () => {
 	return { categories: await prisma.category.findMany() };
@@ -34,59 +35,52 @@ export const actions = {
 		};
 
 		// Validation
-		if (title.length < 3) {
-			errors.title = 'title should be at least 3 characters long!';
-		}
+		if (imgs.length === 0 || imgs[0].size === 0)
+			errors.imgs = 'Each product should at least have one image!';
 		// Check for errors
-		if (!!Object.entries(errors).length) {
-			return { data, errors };
-		}
+		if (!!Object.entries(errors).length) return fail(400, { data, errors });
 
 		const dbRes = await prisma.product.create({
 			data: {
 				title: title.toString(),
 				brand: brand.toString(),
 				published: Boolean(published.toString()),
-				category: { connect: { id: Number(category.toString()) } },
+				category: { connect: { id: category.toString() } },
 				price: Number(price.toString()),
-				discount: Number(price.toString()),
+				discount: Number(discount.toString()),
 				quantity: Number(quantity.toString()),
 				description: description.toString(),
-				tags: tags.toString(),
-				fileNames: imgs
-					.map((img: File, i: number) => {
-						let ext: any = img.name.split('.');
-						ext = ext[ext.length - 1];
-						return `${i}.${ext}`;
-					})
-					.join(',')
+				tags: tags.toString()
 			}
 		});
 
-		// Upload Images.
-		if (imgs.length > 0) {
-			try {
-				imgs.forEach(async (img: File, i: number) => {
-					let ext: any = img.name.split('.');
-					ext = ext[ext.length - 1];
-					await mkdir(`static/data/${dbRes.id}`, { recursive: true });
-					await writeFile(
-						`static/data/${dbRes.id}/${i}.${ext}`,
-						Buffer.from(await img.arrayBuffer())
-					);
-				});
-			} catch (err: any) {
-				console.error(err);
-				if (err.code === 'EEXIST') {
-					return {
-						data,
-						alert: {
-							type: 'danger',
-							body: `Directory already exists!`
-						}
-					};
-				}
-			}
+		try {
+			const imagesData = imgs.map((img: File) => {
+				const name = `${img.name.split('.')[0]}-${Date.now()}.webp`;
+				return {
+					name,
+					path: `/data/${dbRes.id}/${name}`,
+					type: img.type,
+					productId: dbRes.id
+				};
+			});
+
+			const path = `static/data/${dbRes.id}`;
+			await fs.mkdir(path, { recursive: true });
+			imgs.forEach(async (image: any, i: number) => {
+				await sharp(await image.arrayBuffer())
+					.resize(1280)
+					.webp()
+					.toFile(`${path}/${imagesData[i].name}`);
+			});
+
+			await prisma.images.createMany({ data: imagesData });
+		} catch (err: any) {
+			console.error(err);
+			return fail(400, {
+				data,
+				alert: { type: 'danger', body: JSON.stringify(err) }
+			});
 		}
 
 		// Success.
@@ -94,6 +88,6 @@ export const actions = {
 			'success',
 			`Product "${dbRes.id} has been created successfully!"`
 		);
-		throw redirect(303, '/admin/products' + alert);
+		throw redirect(303, '/admin/products/' + dbRes.id + alert);
 	}
 };

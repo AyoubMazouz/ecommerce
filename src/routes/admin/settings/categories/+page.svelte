@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Icon from '@iconify/svelte';
-	import alertStore from '../../../../stores/alterStore.js';
+	import alertStore from '../../../../lib/stores/alterStore.js';
 
 	export let data;
 	export let form: any;

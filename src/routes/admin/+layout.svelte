@@ -3,7 +3,7 @@
 	import Logo from '$lib/Logo.svelte';
 	import Alert from '$lib/components/Alert.svelte';
 	import Icon from '@iconify/svelte';
-	import alertStore from '../../stores/alterStore.js';
+	import alertStore from '../../lib/stores/alterStore.js';
 
 	export let data;
 	let currPath: string, pathList: string[];
@@ -15,6 +15,8 @@
 		const type = $page.url.searchParams.get('alertType');
 		const body = $page.url.searchParams.get('alertBody');
 		if (type && body) alertStore.set(type, body);
+		$page.url.searchParams.delete('alertType');
+		$page.url.searchParams.delete('alertBody');
 	}
 </script>
 

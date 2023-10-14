@@ -21,9 +21,13 @@ const createStore = () => {
 		}, 10000);
 	};
 
+	const clearById = (id: number) => {
+		update((alerts: Alert[]) => alerts.filter((alert: Alert) => alert.id !== id));
+	};
+
 	const clear = () => _set([]);
 
-	return { subscribe, set, clear };
+	return { subscribe, set, clearById, clear };
 };
 
 const alertStore = createStore();

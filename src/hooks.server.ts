@@ -10,7 +10,7 @@ export async function handle({ event, resolve }) {
 
 	// Get user from db if user is logged in.
 	if (jwtToken) {
-		const decodedToken = jwt.verify(jwtToken, JWT_SECRET) as { id: number; iat: number };
+		const decodedToken = jwt.verify(jwtToken, JWT_SECRET) as { id: string; iat: number };
 		user = await prisma.user.findFirst({ where: { id: decodedToken.id } });
 		if (user) {
 			user.password = '';

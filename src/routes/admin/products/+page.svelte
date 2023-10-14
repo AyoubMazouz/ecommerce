@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { preloadData } from '$app/navigation';
 	import { getRelativeTime } from '$lib/helper/time';
 	import Icon from '@iconify/svelte';
 
@@ -40,7 +41,7 @@
 					<div class="relative flex justify-between">
 						<div class="aspect-[4/3] overflow-hidden">
 							<img
-								src="/data/{prod.id}/{prod.fileNames.split(',')[0]}"
+								src={prod.images[0]?.path}
 								alt="{prod.title} ({prod.id} - {i})"
 								class="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000"
 							/>
@@ -85,7 +86,7 @@
 				>
 					<div class="flex aspect-square overflow-hidden min-w-[11rem] h-44">
 						<img
-							src="/data/{prod.id}/{prod.fileNames.split(',')[0]}"
+							src={prod.images[0]?.path}
 							alt="{prod.title} ({prod.id} - {i})"
 							class="h-full object-cover aspect-square w-full"
 						/>
