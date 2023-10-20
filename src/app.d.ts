@@ -1,6 +1,6 @@
 // See https://kit.svelte.dev/docs/types#app
 
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient, SubCategory } from '@prisma/client';
 
 // for information about these interfaces
 declare global {
@@ -19,6 +19,16 @@ declare global {
 				phone: number | null;
 				address: string | null;
 			};
+		}
+		interface Category {
+			id: string;
+			name: string;
+			subCategories: SubCategory[];
+		}
+		interface SubCategory {
+			id: string;
+			name: string;
+			categoryId: string;
 		}
 		// interface PageData {}
 		// interface Platform {}

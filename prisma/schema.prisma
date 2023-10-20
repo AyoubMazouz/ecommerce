@@ -37,10 +37,25 @@ model User {
   @@index([id, email])
 }
 
-model Category {
+model Brand {
   id       String    @id @default(uuid())
   name     String
   products Product[]
+}
+
+model Category {
+  id            String        @id @default(uuid())
+  name          String
+  subCategories SubCategory[]
+  products      Product[]
+}
+
+model SubCategory {
+  id         String    @id @default(uuid())
+  name       String
+  categoryId String
+  Category   Category  @relation(fields: [categoryId], references: [id])
+  products   Product[]
 }
 
 model Product {
@@ -52,18 +67,24 @@ model Product {
   description    String
   price          Int
   tags           String?
-  quantity       Int?             @default(0)
-  discount       Int?             @default(0)
-  published      Boolean?         @default(false)
-  categoryId     String
-  category       Category         @relation(fields: [categoryId], references: [id])
+  rating         Float            @default(0)
+  quantity       Int              @default(0)
+  sold           Int              @default(0)
+  discount       Int              @default(0)
+  published      Boolean          @default(false)
+  categoryId     String?
+  category       Category?        @relation(fields: [categoryId], references: [id])
+  subCategoryId  String?
+  subCategory    SubCategory?     @relation(fields: [subCategoryId], references: [id])
+  brandId        String?
+  Brand          Brand?           @relation(fields: [brandId], references: [id])
   images         Images[]
   reviews        Review[]
   orderedProduct OrderedProduct[]
   user           User?            @relation(fields: [userId], references: [id])
   userId         String?
 
-  @@index([id, title, brand, price, categoryId])
+  @@index([id, title, brand, price])
 }
 
 model Images {

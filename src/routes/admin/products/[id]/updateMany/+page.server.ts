@@ -9,21 +9,19 @@ export const load = async ({ params }) => {
 		where: { id: params.id },
 		include: { category: true, images: true }
 	});
+	const categories = await prisma.category.findMany({ include: { subCategories: true } });
 
 	if (!product) throw error(404, 'product not found');
 
-	const categories = async () =>
-		await prisma.category.findMany({ include: { subCategories: true } });
-
-	return { product, categories: categories() };
+	return { product, categories };
 };
 
 /** @type {import('./$types').Actions} */
 export const actions = {
-	update: async ({ request, params }) => {
+	create: async ({ request, params }) => {
 		const formValues = await request.formData();
-		const errors: { [key: string]: string } = {};
-		const images = formValues.getAll('imgs') as File[];
+		const errors: any = {};
+		const images: any = formValues.getAll('imgs');
 		const title = formValues.get('title') ?? '';
 		const brand = formValues.get('brand') ?? '';
 		const subCategory = formValues.get('subCategory') ?? '';
@@ -53,7 +51,9 @@ export const actions = {
 		if (!subCategoryFromDb) errors.subCategory = 'Category does not exist!';
 
 		// Check for errors, If there is any, don't continue
-		if (Object.entries(errors).length > 0) return { data, errors };
+		if (!!Object.entries(errors).length) {
+			return { data, errors };
+		}
 
 		// Update Product.
 		await prisma.product.update({
@@ -72,9 +72,9 @@ export const actions = {
 			}
 		});
 
-		if (images.length > 0 && images[0].size > 0) {
+		if (images.length !== 0 || images[0].size !== 0) {
 			// Prepare Images Data.
-			const imagesData = images.map((image) => {
+			const imagesData = images.map((image: File) => {
 				const name = `${image.name.split('.')[0]}-${Date.now()}.webp`;
 				return {
 					name,
@@ -86,7 +86,7 @@ export const actions = {
 			// Optimize then store images in local file system.
 			const path = `static/data/${params.id}`;
 			await fs.mkdir(path, { recursive: true });
-			images.forEach(async (image, i) => {
+			images.forEach(async (image: any, i: number) => {
 				await sharp(await image.arrayBuffer())
 					.resize(1280)
 					.webp()

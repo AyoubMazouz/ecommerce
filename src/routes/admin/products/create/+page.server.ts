@@ -4,7 +4,7 @@ import { getAlertAsParams } from '$lib/helper/url.js';
 import { fail, redirect } from '@sveltejs/kit';
 
 export const load = async () => {
-	return { categories: await prisma.category.findMany() };
+	return { categories: await prisma.category.findMany({ include: { subCategories: true } }) };
 };
 
 /** @type {import('./$types').Actions} */
@@ -12,10 +12,10 @@ export const actions = {
 	create: async ({ request }) => {
 		const formValues = await request.formData();
 		const errors: any = {};
-		const imgs: any = formValues.getAll('imgs');
+		const images: any = formValues.getAll('imgs');
 		const title = formValues.get('title') ?? '';
 		const brand = formValues.get('brand') ?? '';
-		const category = formValues.get('category') ?? '';
+		const subCategory = formValues.get('subCategory') ?? '';
 		const price = formValues.get('price') ?? '0';
 		const discount = formValues.get('discount') ?? '0';
 		const quantity = formValues.get('quantity') ?? '0';
@@ -25,7 +25,7 @@ export const actions = {
 		const data = {
 			title,
 			brand,
-			category,
+			subCategory,
 			price,
 			discount,
 			quantity,
@@ -35,8 +35,14 @@ export const actions = {
 		};
 
 		// Validation
-		if (imgs.length === 0 || imgs[0].size === 0)
+		if (images.length === 0 || images[0].size === 0)
 			errors.imgs = 'Each product should at least have one image!';
+
+		const subCategoryFromDb = await prisma.subCategory.findUnique({
+			where: { id: subCategory.toString() }
+		});
+		if (!subCategoryFromDb) errors.subCategory = 'Category does not exist!';
+
 		// Check for errors
 		if (!!Object.entries(errors).length) return fail(400, { data, errors });
 
@@ -45,7 +51,8 @@ export const actions = {
 				title: title.toString(),
 				brand: brand.toString(),
 				published: Boolean(published.toString()),
-				category: { connect: { id: category.toString() } },
+				category: { connect: { id: subCategoryFromDb?.categoryId } },
+				subCategory: { connect: { id: subCategoryFromDb?.id } },
 				price: Number(price.toString()),
 				discount: Number(discount.toString()),
 				quantity: Number(quantity.toString()),
@@ -55,7 +62,7 @@ export const actions = {
 		});
 
 		try {
-			const imagesData = imgs.map((img: File) => {
+			const imagesData = images.map((img: File) => {
 				const name = `${img.name.split('.')[0]}-${Date.now()}.webp`;
 				return {
 					name,
@@ -67,7 +74,7 @@ export const actions = {
 
 			const path = `static/data/${dbRes.id}`;
 			await fs.mkdir(path, { recursive: true });
-			imgs.forEach(async (image: any, i: number) => {
+			images.forEach(async (image: any, i: number) => {
 				await sharp(await image.arrayBuffer())
 					.resize(1280)
 					.webp()

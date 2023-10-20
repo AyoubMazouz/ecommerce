@@ -11,6 +11,8 @@
 		currPath = $page.url.pathname.replace('/admin/', '');
 		pathList = currPath.split('/');
 	}
+
+	// Set alert coming from URL.
 	$: {
 		const type = $page.url.searchParams.get('alertType');
 		const body = $page.url.searchParams.get('alertBody');
@@ -25,14 +27,14 @@
 <div class="flex w-full min-w-[960px]">
 	<!-- Nav -->
 	<div
-		class="flex flex-col justify-between h-screen border-r border-shading bg-semi-light lg:w-[18rem] xl:w-[22rem]"
+		class="flex flex-col justify-between h-screen border-r border-shading bg-semi-light lg:w-[15rem] xl:w-[20rem] p-2 lg:p-4"
 	>
-		<div class="">
-			<div class="p-4 text-center">
+		<div>
+			<div class="text-center">
 				<Logo />
 			</div>
 			<!-- Links -->
-			<div class="flex flex-col gap-y-2 p-4">
+			<div class="flex flex-col gap-y-2">
 				<a
 					href="/admin/orders"
 					class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-xl trans flex justify-center lg:justify-start items-center gap-x-4 {currPath.startsWith(
@@ -75,7 +77,7 @@
 			</div>
 		</div>
 
-		<div class="p-4 flex flex-col gap-y-2">
+		<div class="flex flex-col gap-y-2">
 			<a
 				href="/admin/support"
 				class="text-semi-dark font-semibold p-3 hover:bg-shading hover:text-semi-dark rounded-xl trans flex items-center justify-center lg:justify-start gap-x-4 {currPath.startsWith(
@@ -106,7 +108,7 @@
 				href=""
 				class="flex gap-x-4 items-center lg:px-4 p-2 rounded-xl border border-shading bg-light hover:opacity-75 trans"
 			>
-				<div class="overflow-hidden aspect-square h-[3.1rem] rounded-full border border-shading">
+				<div class="overflow-hidden aspect-square h-8 rounded-full border border-shading">
 					<img
 						src="https://miro.medium.com/v2/resize:fill:32:32/1*dmbNkD5D-u45r44go_cf0g.png"
 						alt=""
@@ -122,8 +124,9 @@
 			</a>
 		</div>
 	</div>
-	<div class="w-full h-screen overflow-y-scroll min-w-[]">
-		<div class="flex items-center gap-x-4 capitalize p-4">
+	<div class="w-full h-screen overflow-y-scroll">
+		<!-- PaTH -->
+		<div class="flex items-center gap-x-4 capitalize padding mt-2">
 			<button class="btn-flat mr-4">
 				<a href="/admin/{pathList.slice(0, pathList.length - 1).join('/')}">
 					<Icon icon="solar:arrow-left-outline" width="24px" class="text-semi-dark" />

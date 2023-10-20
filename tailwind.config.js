@@ -20,6 +20,9 @@ export default {
 				'info-dark': '#155E75',
 				success: '#34D399',
 				'success-dark': '#166534'
+			},
+			fontFamily: {
+				main: ['Poppins', 'sans-serif']
 			}
 		}
 	},

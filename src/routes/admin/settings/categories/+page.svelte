@@ -1,16 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Icon from '@iconify/svelte';
-	import alertStore from '../../../../lib/stores/alterStore.js';
 
 	export let data;
 	export let form: any;
-
-	// Set alert
-	$: {
-		if (form?.alert) alertStore.set(form.alert.type, form.alert.body);
-		if (form?.errors) Object.entries(form.errors).forEach((e: any) => alertStore.set('danger', e));
-	}
 
 	function handleLowerCase(e: any) {
 		if (e?.target) e.target.value = e.target.value.toLowerCase();

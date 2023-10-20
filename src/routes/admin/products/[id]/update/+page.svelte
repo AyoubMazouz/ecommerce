@@ -24,7 +24,7 @@
 				data: {
 					title: prod.title,
 					brand: prod.brand,
-					category: prod.category.id,
+					subCategory: prod.subCategoryId,
 					price: prod.price,
 					discount: prod.discount,
 					quantity: prod.quantity,
@@ -33,7 +33,7 @@
 					tags: prod.tags
 				}
 			};
-			tags = prod.tags.split(',');
+			tags = prod.tags ? prod.tags.split(',') : [];
 		} else {
 			tags = form.data.tags.split(',');
 		}
@@ -44,9 +44,9 @@
 	}
 
 	function handleTag(e: any) {
-		const val = e.target.value.trim(' ');
+		const val = e.target.value.trim();
 		if (e.key === ' ') {
-			if (val.length < 4) {
+			if (val.length <= 3) {
 				alertStore.set('warn', 'Tag must be at least 3 characters long!');
 				e.target.value = '';
 				return;
@@ -97,7 +97,7 @@
 		handleImagePreviewList({ target: newInput });
 	}
 
-	async function handleDeleteOldImage(id: number) {
+	async function handleDeleteOldImage(id: string) {
 		let res: any = await fetch('/api/delete-image', {
 			method: 'POST',
 			body: JSON.stringify({ id })
@@ -115,7 +115,7 @@
 <div class="padding mt-12">
 	<form
 		method="POST"
-		action="?/create"
+		action="?/update"
 		enctype="multipart/form-data"
 		use:enhance
 		class="grid grid-cols-2 gap-y-4 gap-x-6"
@@ -141,22 +141,22 @@
 			/>
 		</div>
 		<div class="col-span-full flex flex-wrap gap-x-4 gap-y-2 items-center">
-			{#each PreviewImages as file, i (`${file.name}sp4`)}
+			{#each PreviewImages as image, i (`${image.name}sp4`)}
 				<div class="aspect-square h-20 border border-shading rounded-xl overflow-hidden relative">
-					<img src={file.value} alt="image{i}" class="w-full h-full object-cover" />
+					<img src={image.value} alt="image{i}" class="w-full h-full object-cover" />
 					<button
 						type="button"
-						on:click={() => handleRemovePreviewImage(file.name)}
+						on:click={() => handleRemovePreviewImage(image.name)}
 						class="z-10 absolute top-1 right-1 p-1 bg-semi-light/75 rounded-xl hover:bg-semi-light trans"
 						><Icon icon="solar:trash-bin-trash-line-duotone" width="18" /></button
 					>
 				</div>
 			{/each}
-			{#each prod.images as file (`${file.name}sp3`)}
+			{#each prod.images as image (`${image.name}sp3`)}
 				<div class="aspect-square h-20 border border-shading rounded-xl overflow-hidden relative">
-					<img src={file.path} alt={file.name} class="w-full h-full object-cover" />
+					<img src={image.path} alt={image.name} class="w-full h-full object-cover" />
 					<button
-						on:click={() => handleDeleteOldImage(file.id)}
+						on:click={() => handleDeleteOldImage(image.id)}
 						type="button"
 						class="z-10 absolute top-1 right-1 p-1 bg-semi-light/75 rounded-xl hover:bg-semi-light trans"
 						><Icon icon="solar:trash-bin-trash-line-duotone" width="18" /></button
@@ -198,20 +198,24 @@
 		</div>
 		<!-- Category -->
 		<div class="">
-			<label for="category" class="flex items-start"
+			<label for="subCategory" class="flex items-start"
 				>Category <span class="text-danger text-xs">*</span></label
 			>
 			<select
-				name="category"
+				name="subCategory"
 				required
-				bind:value={form.data.category}
+				value={form?.data?.subCategory ?? ''}
 				class="input w-full bg-light"
 			>
-				{#each data.categories as cat (cat)}
-					<option value={cat.id}>{cat.name}</option>
+				{#each data.categories as category (category.name)}
+					<optgroup label={category.name}>
+						{#each category.subCategories as subCategory (subCategory.name)}
+							<option value={subCategory.id}>{subCategory.name}</option>
+						{/each}
+					</optgroup>
 				{/each}
 			</select>
-			<p class="text-danger text-xs mt-1">{form?.errors?.category ?? ''}</p>
+			<p class="text-danger text-xs mt-1">{form?.errors?.subCategory ?? ''}</p>
 		</div>
 		<!-- Price -->
 		<div class="">
@@ -298,6 +302,6 @@
 		</div>
 
 		<div class="" />
-		<button type="submit" class="btn">Add New Product</button>
+		<button type="submit" class="btn">Update Product</button>
 	</form>
 </div>
