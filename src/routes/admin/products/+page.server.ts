@@ -4,8 +4,18 @@ export const load = async ({ url }) => {
 	const categoryId = url.searchParams.get('cat') ?? 'all';
 	const sortBy = url.searchParams.get('sortBy') ?? 'title';
 	const sortDir = url.searchParams.get('sortDir') === 'asc' ? 'asc' : 'desc';
-	const getRating = url.searchParams.get('rating') ?? '0';
-	const rating = /^[0-5]$/.test(getRating) ? parseInt(getRating) : 0;
+	const getRating = url.searchParams.get('rating') ?? '';
+	const rating = /^[0-5]$/.test(getRating) ? parseInt(getRating) : 'all';
+	const _minPrice = url.searchParams.get('minPrice') ?? '';
+	const _maxPrice = url.searchParams.get('maxPrice') ?? '';
+	const minPrice = /^\d+$/.test(_minPrice) ? parseInt(_minPrice) : null;
+	const maxPrice = /^\d+$/.test(_maxPrice) ? parseInt(_maxPrice) : null;
+	const _minDiscount = url.searchParams.get('minDiscount') ?? '';
+	const _maxDiscount = url.searchParams.get('maxDiscount') ?? '';
+	const minDiscount = /^\d+$/.test(_minDiscount) ? parseInt(_minDiscount) : null;
+	const maxDiscount = /^\d+$/.test(_maxDiscount) ? parseInt(_maxDiscount) : null;
+
+	console.log(minPrice, maxPrice, minDiscount, maxDiscount);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const options: any = { where: {}, orderBy: {} };
@@ -15,8 +25,20 @@ export const load = async ({ url }) => {
 		options.where = { OR: [{ categoryId }, { subCategoryId: categoryId }] };
 	}
 	// Rating
-	if (rating !== 0) {
+	if (rating !== 'all') {
 		options.where = { rating: { gt: rating } };
+	}
+	// Price
+	if (minPrice || maxPrice) {
+		options.where = { price: {} };
+		if (minPrice) options.where.price.gt = minPrice;
+		if (maxPrice) options.where.price.lt = maxPrice;
+	}
+	// Discount
+	if (minDiscount || maxDiscount) {
+		options.where = { discount: {} };
+		if (minDiscount) options.where.discount.gt = minDiscount;
+		if (maxDiscount) options.where.discount.lt = maxDiscount;
 	}
 	// Sorting
 	const sortOpt = ['title', 'price', 'rating', 'createdAt', 'discount', 'quantity'];

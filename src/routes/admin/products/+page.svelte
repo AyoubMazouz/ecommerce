@@ -4,14 +4,20 @@
 	import { getRelativeTime } from '$lib/helper/time';
 	import Icon from '$lib/components/Icon.svelte';
 	import { page } from '$app/stores';
-	import type { Product } from '@prisma/client';
+
+	import { goto } from '$app/navigation';
 
 	export let data;
 	let listMode = false;
+	let filterMenu = false;
 	$: cat = $page.url.searchParams.get('cat') ?? 'all';
 	$: sortBy = $page.url.searchParams.get('sortBy') ?? 'title';
 	$: sortDir = $page.url.searchParams.get('sortDir') ?? 'asc';
-	$: rating = $page.url.searchParams.get('rating') ?? '0';
+	$: rating = $page.url.searchParams.get('rating') ?? 'all';
+	let minPrice = $page.url.searchParams.get('minPrice') ?? '';
+	let maxPrice = $page.url.searchParams.get('maxPrice') ?? '';
+	let minDiscount = $page.url.searchParams.get('minDiscount') ?? '';
+	let maxDiscount = $page.url.searchParams.get('maxDiscount') ?? '';
 	let categoryUrls = [['all', 'all']];
 	$: {
 		categoryUrls = [['all', 'all']];
@@ -40,7 +46,17 @@
 		}
 	}
 	function getQueryUrl(options: {}) {
-		const opt = { cat, sortBy, sortDir, rating, ...options };
+		const opt = {
+			cat,
+			sortBy,
+			sortDir,
+			rating,
+			minPrice,
+			maxPrice,
+			minDiscount,
+			maxDiscount,
+			...options
+		};
 		const params = new URLSearchParams();
 		Object.entries(opt).forEach(([key, value]: string[]) => params.append(key, value));
 		return '/admin/products?' + params.toString();
@@ -68,6 +84,18 @@
 			});
 		}
 	}
+	function handlePriceFilter() {
+		if (minPrice && maxPrice && minPrice > maxPrice) {
+			[minPrice, maxPrice] = ['', ''];
+			goto(getQueryUrl({ minPrice, maxPrice }));
+		} else goto(getQueryUrl({ minPrice, maxPrice }));
+	}
+	function handleDiscountFilter() {
+		if (minDiscount && maxDiscount && minDiscount > maxDiscount) {
+			[minDiscount, maxDiscount] = ['', ''];
+			goto(getQueryUrl({ minDiscount, maxDiscount }));
+		} else goto(getQueryUrl({ minDiscount, maxDiscount }));
+	}
 </script>
 
 <div class="padding bg-light mt-4">
@@ -88,116 +116,20 @@
 				<span>{data.products.length}</span>
 			</div>
 		</div>
-		<div class="flex gap-x-2 items-center">
-			<!-- Add New Product -->
-			<a href="/admin/products/create" class="btn flex gap-x-2">
-				<Icon icon="addItem" />
-				New</a
-			>
-			<!-- Right Side # Sort  -->
-			<button on:click={() => menuStore.set('sort')} class="btn-flat flex gap-x-2 relative z-20">
-				{#if sortDir === 'asc'}
-					<Icon icon="solar:sort-from-bottom-to-top-line-duotone" />
-				{:else}
-					<Icon icon="solar:sort-from-top-to-bottom-line-duotone" />
-				{/if}
-				Sort By {sortBy}
-				{#if $menuStore === 'sort'}
-					<div
-						in:fly={{ y: -10, duration: 200 }}
-						out:fade={{ duration: 200 }}
-						class="absolute top-[120%] right-[0%] bg-light rounded-xl shadow-xl border border-shading overflow-hidden text-sm"
-					>
-						<a
-							target="_self"
-							href={getQueryUrl({ sortBy: 'title', sortDir: 'asc' })}
-							class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light trans whitespace-nowrap border-b border-shading"
-						>
-							<Icon icon="solar:sort-by-alphabet-bold-duotone" />
-							Title Asc</a
-						>
-						<a
-							target="_self"
-							href={getQueryUrl({ sortBy: 'title', sortDir: 'desc' })}
-							class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light trans whitespace-nowrap border-b border-shading"
-						>
-							<Icon icon="solar:sort-by-alphabet-bold-duotone" />
-							Title Desc</a
-						>
-						<a
-							target="_self"
-							href={getQueryUrl({ sortBy: 'createdAt', sortDir: 'asc' })}
-							class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary border-b border-shading hover:text-semi-light trans whitespace-nowrap"
-						>
-							<Icon icon="time" />
-							Latest
-						</a>
-						<a
-							target="_self"
-							href={getQueryUrl({ sortBy: 'createdAt', sortDir: 'desc' })}
-							class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary border-b border-shading hover:text-semi-light trans whitespace-nowrap"
-						>
-							<Icon icon="time" />
-							Oldest
-						</a>
-						<a
-							target="_self"
-							href={getQueryUrl({ sortBy: 'price', sortDir: 'asc' })}
-							class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light trans border-b border-shading whitespace-nowrap"
-						>
-							<Icon icon="price" />
-							Price Asc</a
-						>
-						<a
-							target="_self"
-							href={getQueryUrl({ sortBy: 'price', sortDir: 'desc' })}
-							class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light trans whitespace-nowrap border-b border-shading"
-						>
-							<Icon icon="price" />
-							Price Desc</a
-						>
-						<a
-							target="_self"
-							href={getQueryUrl({ sortBy: 'rating', sortDir: 'asc' })}
-							class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light border-b border-shading trans whitespace-nowrap"
-						>
-							<Icon icon="rating" />
-							Rating</a
-						>
-						<a
-							target="_self"
-							href={getQueryUrl({ sortBy: 'sold', sortDir: 'asc' })}
-							class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light border-b border-shading trans whitespace-nowrap"
-						>
-							<Icon icon="popular" />
-							Popularity
-						</a>
-						<a
-							target="_self"
-							href={getQueryUrl({ sortBy: 'quantity', sortDir: 'desc' })}
-							class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary border-b border-shading hover:text-semi-light trans whitespace-nowrap"
-						>
-							<Icon icon="quantity" />
-							Quantity
-						</a>
-						<a
-							target="_self"
-							href={getQueryUrl({ sortBy: 'discount', sortDir: 'desc' })}
-							class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light trans whitespace-nowrap"
-						>
-							<Icon icon="discount" />
-							Discount
-						</a>
-					</div>
-				{/if}
-			</button>
-		</div>
+		<!-- Add New Product -->
+		<a href="/admin/products/create" class="btn flex gap-x-2">
+			<Icon icon="addItem" />
+			New</a
+		>
 	</div>
 
 	<!-- #2 -->
 	<div class="flex items-center justify-between gap-x-4 my-4">
-		<!-- left Side -->
 		<div class="flex items-center gap-x-4">
+			<!-- FilterMenu -->
+			<button class="btn-flat" on:click={() => (filterMenu = !filterMenu)}>
+				<Icon icon="menu" />
+			</button>
 			<!-- ViewMode -->
 			<div class="flex rounded-xl overflow-hidden border border-shading text-semi-dark">
 				<button
@@ -211,6 +143,105 @@
 					class="p-2 trans {!listMode ? 'bg-primary text-light' : 'bg-semi-light'}"
 					><Icon icon="listStyle" /></button
 				>
+			</div>
+			<!-- Sort  -->
+			<div class="flex gap-x-2 items-center">
+				<button on:click={() => menuStore.set('sort')} class="btn-flat flex gap-x-2 relative z-20">
+					{#if sortDir === 'asc'}
+						<Icon icon="solar:sort-from-bottom-to-top-line-duotone" />
+					{:else}
+						<Icon icon="solar:sort-from-top-to-bottom-line-duotone" />
+					{/if}
+					Sort By {sortBy}
+					{#if $menuStore === 'sort'}
+						<div
+							in:fly={{ y: -10, duration: 200 }}
+							out:fade={{ duration: 200 }}
+							class="absolute top-[120%] right-[0%] bg-light rounded-xl shadow-xl border border-shading overflow-hidden text-sm"
+						>
+							<a
+								target="_self"
+								href={getQueryUrl({ sortBy: 'title', sortDir: 'asc' })}
+								class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light trans whitespace-nowrap border-b border-shading"
+							>
+								<Icon icon="solar:sort-by-alphabet-bold-duotone" />
+								Title Asc</a
+							>
+							<a
+								target="_self"
+								href={getQueryUrl({ sortBy: 'title', sortDir: 'desc' })}
+								class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light trans whitespace-nowrap border-b border-shading"
+							>
+								<Icon icon="solar:sort-by-alphabet-bold-duotone" />
+								Title Desc</a
+							>
+							<a
+								target="_self"
+								href={getQueryUrl({ sortBy: 'createdAt', sortDir: 'asc' })}
+								class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary border-b border-shading hover:text-semi-light trans whitespace-nowrap"
+							>
+								<Icon icon="time" />
+								Latest
+							</a>
+							<a
+								target="_self"
+								href={getQueryUrl({ sortBy: 'createdAt', sortDir: 'desc' })}
+								class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary border-b border-shading hover:text-semi-light trans whitespace-nowrap"
+							>
+								<Icon icon="time" />
+								Oldest
+							</a>
+							<a
+								target="_self"
+								href={getQueryUrl({ sortBy: 'price', sortDir: 'asc' })}
+								class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light trans border-b border-shading whitespace-nowrap"
+							>
+								<Icon icon="price" />
+								Price Asc</a
+							>
+							<a
+								target="_self"
+								href={getQueryUrl({ sortBy: 'price', sortDir: 'desc' })}
+								class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light trans whitespace-nowrap border-b border-shading"
+							>
+								<Icon icon="price" />
+								Price Desc</a
+							>
+							<a
+								target="_self"
+								href={getQueryUrl({ sortBy: 'rating', sortDir: 'asc' })}
+								class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light border-b border-shading trans whitespace-nowrap"
+							>
+								<Icon icon="rating" />
+								Rating</a
+							>
+							<a
+								target="_self"
+								href={getQueryUrl({ sortBy: 'sold', sortDir: 'asc' })}
+								class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light border-b border-shading trans whitespace-nowrap"
+							>
+								<Icon icon="popular" />
+								Popularity
+							</a>
+							<a
+								target="_self"
+								href={getQueryUrl({ sortBy: 'quantity', sortDir: 'desc' })}
+								class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary border-b border-shading hover:text-semi-light trans whitespace-nowrap"
+							>
+								<Icon icon="quantity" />
+								Quantity
+							</a>
+							<a
+								target="_self"
+								href={getQueryUrl({ sortBy: 'discount', sortDir: 'desc' })}
+								class="flex gap-x-2 items-center p-2 pr-6 hover:bg-primary hover:text-semi-light trans whitespace-nowrap"
+							>
+								<Icon icon="discount" />
+								Discount
+							</a>
+						</div>
+					{/if}
+				</button>
 			</div>
 		</div>
 		<div class="flex gap-x-2">
@@ -235,7 +266,7 @@
 			<!-- Select -->
 			<button
 				on:click={handleSelectAll}
-				class="flex items-center p-1 mr-2.5 rounded-xl hover:bg-shading hover:shadow-lg active:scale-105 focus:ring focus:ring-shading trans bg-light {selected.length ===
+				class="flex items-center p-1 mr-1.5 rounded-xl hover:bg-shading hover:shadow-lg active:scale-105 focus:ring focus:ring-shading trans bg-light {selected.length ===
 					data.products.length && selected.length !== 0
 					? 'border-success border-2'
 					: 'border-shading border'}"
@@ -252,43 +283,118 @@
 		</div>
 	</div>
 
-	<!-- #3 -->
+	<!-- Body -->
 	<div class="flex">
 		<!-- Filter -->
-		<div class="min-w-[12rem] text-sm">
-			<!-- Categories -->
-			<div class="flex flex-col -ml-2">
-				{#each data.categories as category (`mobileMenu${category.name}`)}
-					<a href="/admin/products?cat={category.id}" class="w-full font-semibold flex items-center"
-						><Icon icon="dropDown" className="rotate-90" /> {category.name}</a
-					>
-					{#if categoryUrls.length >= 2 && (category.id === cat || category.subCategories
-								.map((s) => s.id)
-								.includes(cat))}
-						{#each category.subCategories as SubCategory (`mobileMenu${SubCategory.name}`)}
-							<a href="/admin/products?cat={SubCategory.id}" class="w-full pl-4 trans"
-								>{SubCategory.name}
-							</a>
+		{#if filterMenu}
+			<div transition:fly={{ x: -224, duration: 200 }} class="w-[15rem] space-y-6">
+				<!-- Categories -->
+				<div>
+					<h1 class="font-bold text-semi-dark">Categories</h1>
+					<div class="flex flex-col gap-y-1">
+						<a href="/admin/products" class="w-full flex items-center font-semibold"> All</a>
+						{#each data.categories as category (`mobileMenu${category.name}`)}
+							<a
+								href="/admin/products?cat={category.id}"
+								class="w-full flex items-center pl-3 {categoryUrls[1] &&
+								categoryUrls[1][0] === category.id
+									? 'font-semibold'
+									: 'hover:text-primary'}"
+							>
+								{category.name}</a
+							>
+							{#if categoryUrls[1] && category.id === categoryUrls[1][0]}
+								<div class="flex flex-col -mt-1">
+									{#each category.subCategories as subCategory (`mobileMenu${subCategory.name}`)}
+										<a
+											href="/admin/products?cat={subCategory.id}"
+											class="w-full pl-6 trans {categoryUrls[2] &&
+											categoryUrls[2][0] === subCategory.id
+												? 'font-semibold'
+												: 'hover:text-primary'}"
+											>{subCategory.name}
+										</a>
+									{/each}
+								</div>
+							{/if}
 						{/each}
-					{/if}
-				{/each}
+					</div>
+				</div>
+				<!-- Reviews -->
+				<div class="flex flex-col">
+					<h1 class="font-bold text-semi-dark">Reviews</h1>
+					<a
+						href={getQueryUrl({ rating: 'all' })}
+						class={rating === 'all' ? 'font-semibold' : 'hover:text-primary'}>All</a
+					>
+					<a
+						href={getQueryUrl({ rating: '0' })}
+						class={rating === '0' ? 'font-semibold' : 'hover:text-primary'}>0 Review</a
+					>
+					{#each { length: 5 } as _, i (`ratingFilter${i}`)}
+						{#if i > 0}
+							<a
+								href={getQueryUrl({ rating: `${i}` })}
+								class="flex gap-x-1 trans {rating === `${i}`
+									? 'font-semibold'
+									: 'hover:text-primary'}"
+							>
+								{#each { length: i } as _, j (`ratingFilter2${j}`)}
+									<Icon icon="rating" />
+								{/each}
+								<span>& Up</span>
+							</a>
+						{/if}
+					{/each}
+				</div>
+				<!-- Price -->
+				<div>
+					<h1 class="text-semi-dark font-semibold">Price</h1>
+					<a
+						href={getQueryUrl({ minPrice: '', maxPrice: '' })}
+						on:click={() => ([minPrice, maxPrice] = ['', ''])}>Any Price</a
+					>
+					<div class="w-[15rem] grid grid-cols-5 gap-x-2 items-center mt-1">
+						<input
+							type="number"
+							class="input placeholder:text-sm col-span-2"
+							placeholder="$ Min"
+							bind:value={minPrice}
+						/>
+						<input
+							type="number"
+							class="input placeholder:text-sm col-span-2"
+							placeholder="$ Max"
+							bind:value={maxPrice}
+						/>
+						<button on:click={handlePriceFilter} class="btn-flat">Go</button>
+					</div>
+				</div>
+				<!-- Price -->
+				<div>
+					<h1 class="text-semi-dark font-semibold">Discount</h1>
+					<a
+						href={getQueryUrl({ minDiscount: '', maxDiscount: '' })}
+						on:click={() => ([minDiscount, maxDiscount] = ['', ''])}>Any Discount</a
+					>
+					<div class="grid grid-cols-5 gap-x-2 items-center mt-1">
+						<input
+							type="number"
+							class="input placeholder:text-sm col-span-2"
+							placeholder="$ Min"
+							bind:value={minDiscount}
+						/>
+						<input
+							type="number"
+							class="input placeholder:text-sm col-span-2"
+							placeholder="$ Max"
+							bind:value={maxDiscount}
+						/>
+						<button on:click={handleDiscountFilter} class="btn-flat">Go</button>
+					</div>
+				</div>
 			</div>
-			<!-- Reviews -->
-			<div>
-				<h1 class="font-bold mb-2">Customer Reviews</h1>
-				<a href="/admin/products?sortBy={sortBy}&sortDir={sortDir}" class="">Clear</a>
-				{#each { length: 5 } as _, i (`ratingFilter${i}`)}
-					{#if i > 0}
-						<a href={getQueryUrl({ rating: i })} class="flex gap-x-1 hover:text-primary trans">
-							{#each { length: i } as _, j (`ratingFilter2${j}`)}
-								<Icon icon="rating" size="sm" />
-							{/each}
-							<span>& Up</span>
-						</a>
-					{/if}
-				{/each}
-			</div>
-		</div>
+		{/if}
 
 		<!-- Products -->
 		<div
